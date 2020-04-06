@@ -15,14 +15,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 
-app.use('/berrycheckin', express.static('./berrycheckin/public/'));
-app.use(express.static('./bdwmainpage/public'))
-app.use('/berrycheckin',apiRouter);
+app.use('/berrycheckin', express.static('./berrycheckin/build/'));
+app.use(express.static('./bdwmainpage/build/'))
+app.use('/api_bci',apiRouter);
 
-app.get('/berrycheckin_re', (req,res,next) =>{
+/*app.get('/berrycheckin_re', (req,res,next) =>{
     console.log(`Here`);
     res.status(200).redirect('/berrycheckin');
-});
+});*/
 
 app.use(errorHandler());
 

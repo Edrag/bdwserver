@@ -1,0 +1,3 @@
+[submodule "bdwmainpage"]
+	path = bdwmainpage
+	url = https://github.com/Edrag/bdwserver.git

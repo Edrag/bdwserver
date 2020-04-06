@@ -223,7 +223,7 @@ apiRouter.post('/formsubmit',(req,res,next)=>{
                     return res.sendStatus(500)
                 } else {
                     console.log(row);
-                    res.status(201).redirect('/');
+                    res.status(201).redirect('/berrycheckin');
                 }
             }
         );
