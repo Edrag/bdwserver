@@ -238,6 +238,7 @@ apiRouter.post('/formsubmit',(req,res,next)=>{
 });
 
 apiRouter.get('/last5', (req,res,next)=>{
+    console.log(`Here at last5 request`);
     db.all(`SELECT * FROM DetailView`, 
         (error, rows)=>{
             if(error) {
