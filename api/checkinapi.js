@@ -2,7 +2,12 @@ const express = require('express');
 const sqlite = require('sqlite3');
 
 const apiRouter = express.Router();
-const db = new sqlite.Database('./berryharvest20192020.sqlite');
+const db = new sqlite.Database('../berryharvest20192020.sqlite', (err)=>{
+    if(err) {
+        return console.error(err.message);
+    }
+    console.log(`Connected to SQlite database`);
+});
 
 let berryVarIdList= [];
 let blockNameList = [];
