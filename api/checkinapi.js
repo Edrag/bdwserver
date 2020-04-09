@@ -2,49 +2,31 @@ const express = require('express');
 const sqlite = require('sqlite3');
 
 const apiRouter = express.Router();
-const db = new sqlite.Database('../berryharvest20192020.sqlite', (err)=>{
+const db = new sqlite.Database('./berryharvest20192020.sqlite', (err)=>{
     if(err) {
         return console.error(err.message);
     }
     console.log(`Connected to SQlite database`);
+    db.all(`SELECT 
+        name
+    FROM 
+        sqlite_master 
+    WHERE 
+        type ='table' AND 
+        name NOT LIKE 'sqlite_%';`,
+        (error, tables)=>{
+            if(error) {
+                return console.error(error.message);
+            }
+            console.log(tables);
+        }
+    );
 });
 
 let berryVarIdList= [];
 let blockNameList = [];
 
-/*apiRouter.use('/',(req,res,next)=>{
-    db.run(`CREATE VIEW IF NOT EXISTS DetailView AS SELECT
-        EntryId,
-        DateTime,
-        BerryTypes.BerryTypeName AS BerryType,
-        BlockNames.BlockName AS BlockName,
-        BerryVarieties.BerryVarietyName AS VarietyName,
-        BerryGrade,
-        BatchNum,
-        GrossWeight,
-        NumOfCrates,
-        IndivCrateWeight,
-        NettWeight,
-        Team,
-        Temperature,
-        Brix,
-        GramPerBerry,
-        Colour,
-        Feel,
-        Comments
-    FROM BerryRecords
-    INNER JOIN BerryTypes ON BerryTypes.BerryTypeNumber = BerryRecords.BerryTypeNumber
-    INNER JOIN BlockNames ON BlockNames.BlockName = BerryRecords.BerryBlockNumber
-    INNER JOIN BerryVarieties ON BerryVarieties.BerryVarietyName = BerryRecords.BerryVarietyNumber;`,
-    (error) => {
-        if(error) {
-            console.log(error);
-            next(error);
-        } else {
-            next();
-        }
-    });
-})*/
+
 
 apiRouter.get('/record/:id', (req,res,next) =>{
     db.get(`SELECT * FROM BerryRecords WHERE EntryId=${req.params.id}`,
@@ -238,8 +220,8 @@ apiRouter.post('/formsubmit',(req,res,next)=>{
 });
 
 apiRouter.get('/last5', (req,res,next)=>{
-    console.log(`Here at last5 request`);
-    db.all(`SELECT * FROM DetailView`, 
+    //console.log(`Here at last5 request`);
+    db.all(`SELECT * FROM DetailView LIMIT 5`, 
         (error, rows)=>{
             if(error) {
                 console.log(error)
@@ -253,6 +235,7 @@ apiRouter.get('/last5', (req,res,next)=>{
 });
 
 apiRouter.get('/sumday/:date', (req,res,next)=>{
+    //console.log(`Here`);
     db.all(`SELECT
         BerryTypeName,
         SeasonWeight,
@@ -308,3 +291,37 @@ apiRouter.delete('/delrecord/:id', (req,res,next)=>{
 })
 
 module.exports = apiRouter;
+
+/*apiRouter.use('/',(req,res,next)=>{
+    db.run(`CREATE VIEW IF NOT EXISTS DetailView AS SELECT
+        EntryId,
+        DateTime,
+        BerryTypes.BerryTypeName AS BerryType,
+        BlockNames.BlockName AS BlockName,
+        BerryVarieties.BerryVarietyName AS VarietyName,
+        BerryGrade,
+        BatchNum,
+        GrossWeight,
+        NumOfCrates,
+        IndivCrateWeight,
+        NettWeight,
+        Team,
+        Temperature,
+        Brix,
+        GramPerBerry,
+        Colour,
+        Feel,
+        Comments
+    FROM BerryRecords
+    INNER JOIN BerryTypes ON BerryTypes.BerryTypeNumber = BerryRecords.BerryTypeNumber
+    INNER JOIN BlockNames ON BlockNames.BlockName = BerryRecords.BerryBlockNumber
+    INNER JOIN BerryVarieties ON BerryVarieties.BerryVarietyName = BerryRecords.BerryVarietyNumber;`,
+    (error) => {
+        if(error) {
+            console.log(error);
+            next(error);
+        } else {
+            next();
+        }
+    });
+})*/
