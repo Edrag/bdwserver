@@ -1,5 +1,6 @@
 const express = require('express');
 const sqlite = require('sqlite3');
+const Ajv = require('ajv');
 
 const apiRouter = express.Router();
 const db = new sqlite.Database('./berryharvest20192020.sqlite', (err)=>{
@@ -25,8 +26,54 @@ const db = new sqlite.Database('./berryharvest20192020.sqlite', (err)=>{
 
 let berryVarIdList= [];
 let blockNameList = [];
+//"$schema": "http://json-schema.org/draft/2019-09/schema#",
+const formSchema = {
+    "type":"object",
+    "properties": {
+        "entryid": {"type":["number","string", "null"], "maxLength":16},
+        "datetime": {"type":"string", "maxLength":50},
+        "berrytype": {"type":"string", "maxLength":6},
+        "blockid": {"type":"string", "maxLength":6},
+        "varietyid": {"type":"string", "maxLength":6},
+        "berrygrade": {"type":"string", "maxLength":6},
+        "batchnum": {"type":["string","null"], "maxLength":6},
+        "numofcrates": {"type":"string", "maxLength":6},
+        "grossweight": {"type":"string", "maxLength":6},
+        "crateindividualweight": {"type":"string", "maxLength":6},
+        "nettweight": {"type":"string", "maxLength":6},
+        "qcteam": {"type":["number","string", "null"], "default":null},
+        "qctemp": {"type":["string","null"], "maxLength":6},
+        "qcbrix": {"type":["string","null"], "maxLength":6},
+        "qcgpberry": {"type":["string","null"], "maxLength":6},
+        "qccolour": {"type":["string", "null"], "maxLength":20},
+        "qcfeel": {"type":["string", "null"], "maxLength":20},
+        "qccomments": {"type":["number","string", "null"], "maxLength":50},
+    },
+    "additionalProperties":false,
+    "required":["datetime","berrytype","blockid","varietyid","berrygrade","numofcrates","grossweight","crateindividualweight","nettweight"]
+}
 
+const ajv = new Ajv();
+const validate = ajv.compile(formSchema);
 
+apiRouter.use('/post/', (req,res,next)=>{
+    //&&(key!=="batchnum"&&key!=="qccomments")
+    Object.keys(req.body).forEach((key)=>{
+        if(req.body[key]==='') {
+            req.body[key]=null;
+        };
+    });
+
+    let valid = validate(req.body);
+    if(!valid) {
+        console.log(validate.errors);
+        return next(validate.errors);
+    }
+
+    console.log(`Validation:`);
+    console.log(req.body);
+    next();
+});
 
 apiRouter.get('/record/:id', (req,res,next) =>{
     db.get(`SELECT * FROM BerryRecords WHERE EntryId=${req.params.id}`,
@@ -41,7 +88,7 @@ apiRouter.get('/record/:id', (req,res,next) =>{
     )
 });
 
-apiRouter.post('/record/', (req,res,next)=> {
+apiRouter.post('/post/record', (req,res,next)=> {
     console.log(`we are going to update ${req.body.entryid}`);
     db.run(`UPDATE BerryRecords
     SET
@@ -50,7 +97,7 @@ apiRouter.post('/record/', (req,res,next)=> {
         BerryBlockNumber = ${req.body.blockid},
         BerryVarietyNumber = ${req.body.varietyid},
         BerryGrade = '${req.body.berrygrade}',
-        BatchNum = '${req.body.batchnum}', 
+        BatchNum = ${typeof(req.body.batchnum)==="string"?`'${req.body.batchnum}'`:req.body.batchnum}, 
         NumOfCrates = ${req.body.numofcrates},
         GrossWeight = ${req.body.grossweight},
         IndivCrateWeight = ${req.body.crateindividualweight},
@@ -61,7 +108,7 @@ apiRouter.post('/record/', (req,res,next)=> {
         GramPerBerry = ${req.body.qcgpberry},
         Colour = '${req.body.qccolour}',
         Feel = '${req.body.qcfeel}',
-        Comments = '${req.body.qccomments}'
+        Comments = ${typeof(req.body.qccomments)==="string"?`'${req.body.qccomments}'`:req.body.qccomments}
     WHERE
         EntryId = ${req.body.entryid}`,
         (error)=>{  
@@ -157,7 +204,8 @@ apiRouter.get('/varieties/:blocknum/:berrytype', (req,res,next)=>{
     )
 });
 
-apiRouter.post('/formsubmit',(req,res,next)=>{
+apiRouter.post('/post/formsubmit',(req,res,next)=>{
+    console.log(`Submission:`);
     console.log(req.body);
     db.run(`INSERT INTO BerryRecords (
         DateTime,
@@ -183,7 +231,7 @@ apiRouter.post('/formsubmit',(req,res,next)=>{
         ${req.body.blockid},
         ${req.body.varietyid},
         '${req.body.berrygrade}',
-        '${req.body.batchnum}',
+        ${typeof(req.body.batchnum)==="string"?`'${req.body.batchnum}'`:req.body.batchnum},
         ${req.body.numofcrates},
         ${req.body.grossweight},
         ${req.body.crateindividualweight},
@@ -194,15 +242,15 @@ apiRouter.post('/formsubmit',(req,res,next)=>{
         ${req.body.qcgpberry},
         '${req.body.qccolour}',
         '${req.body.qcfeel}',
-        '${req.body.qccomments}'
+        ${typeof(req.body.qccomments)==="string"?`'${req.body.qccomments}'`:req.body.qccomments}
     )`,
     function(error) {
-        console.log(this.lastID);
         if(error) {
             console.log(`Here`)
             console.log(error)
             return res.sendStatus(500);
         }
+        console.log(this.lastID);
         db.get(`SELECT * FROM BerryRecords WHERE EntryId = ${this.lastID}`,
             (error,row)=>{
                 if(error) {
@@ -243,7 +291,7 @@ apiRouter.get('/sumday/:date', (req,res,next)=>{
     FROM
         (SELECT
             BerryTypes.BerryTypeName,
-            SUM(VarietyInBlockSum) AS SeasonWeight
+            ROUND(SUM(VarietyInBlockSum),2) AS SeasonWeight
         FROM
             SeasonSumForVarietyInBlockViewSinceAug
         INNER JOIN BerryTypes ON

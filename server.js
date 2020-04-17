@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 
-app.use('/berrycheckin', express.static('./berrycheckin/build/'));
+//app.use('/berrycheckin', express.static('./berrycheckin/build/'));
 app.use(express.static('./bdwmainpage/build/'))
 app.use('/api_bci',apiRouter);
 
