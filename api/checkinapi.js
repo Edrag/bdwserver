@@ -269,7 +269,7 @@ apiRouter.post('/post/formsubmit',(req,res,next)=>{
 
 apiRouter.get('/last5', (req,res,next)=>{
     //console.log(`Here at last5 request`);
-    db.all(`SELECT * FROM DetailView LIMIT 5`, 
+    db.all(`SELECT * FROM DetailView LIMIT 200`, 
         (error, rows)=>{
             if(error) {
                 console.log(error)
@@ -283,7 +283,7 @@ apiRouter.get('/last5', (req,res,next)=>{
 });
 
 apiRouter.get('/sumday/:date', (req,res,next)=>{
-    //console.log(`Here`);
+    console.log(`Here sumday`);
     db.all(`SELECT
         BerryTypeName,
         SeasonWeight,

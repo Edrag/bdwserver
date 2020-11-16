@@ -4,13 +4,13 @@
   "description": "handle requests as main point to other apps",
   "main": "server.js",
   "dependencies": {
-    "ajv": "^6.12.0",
+    "ajv": "^6.12.5",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "errorhandler": "^1.5.1",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
-    "sqlite3": "^4.1.1"
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {},
   "scripts": {
