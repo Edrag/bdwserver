@@ -3,7 +3,7 @@ const sqlite = require('sqlite3');
 const Ajv = require('ajv');
 
 const apiRouter = express.Router();
-const db = new sqlite.Database('./berryharvest20192020.sqlite', (err)=>{
+const db = new sqlite.Database('./berryharvest.sqlite', (err)=>{
     if(err) {
         return console.error(err.message);
     }
