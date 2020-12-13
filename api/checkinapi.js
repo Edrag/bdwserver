@@ -285,31 +285,48 @@ apiRouter.get('/last5', (req,res,next)=>{
 apiRouter.get('/sumday/:date', (req,res,next)=>{
     console.log(`Here sumday`);
     db.all(`SELECT
-        BerryTypeName,
-        SeasonWeight,
-        DayWeight
+    BerryTypeName,
+    SeasonWeight,
+    DayWeightClass1,
+    DayWeightClassOther
+FROM
+    (SELECT
+        BerryTypes.BerryTypeName,
+        ROUND(SUM(VarietyInBlockSum),2) AS SeasonWeight
     FROM
-        (SELECT
-            BerryTypes.BerryTypeName,
-            ROUND(SUM(VarietyInBlockSum),2) AS SeasonWeight
-        FROM
-            SeasonSumForVarietyInBlockViewSinceAug
-        INNER JOIN BerryTypes ON
-            SeasonSumForVarietyInBlockViewSinceAug.BerryTypeNumber = BerryTypes.BerryTypeNumber
-        GROUP BY
-            BerryTypeName) t1
-    LEFT JOIN
-        (SELECT
-            BerryType,
-            SUM(NettWeight) AS DayWeight
-        FROM
-            DetailView
-        WHERE
-            strftime('%Y-%m-%d',DateTime)='${req.params.date}'
-        GROUP BY
-            BerryType) t2
-    ON
-        t1.BerryTypeName = t2.BerryType`,
+        SeasonSumForVarietyInBlockViewSinceAug
+    INNER JOIN BerryTypes ON
+        SeasonSumForVarietyInBlockViewSinceAug.BerryTypeNumber = BerryTypes.BerryTypeNumber
+    GROUP BY
+        BerryTypeName) t1
+LEFT JOIN
+    (SELECT
+        BerryType,
+        SUM(NettWeight) AS DayWeightClass1
+    FROM
+        DetailView
+    WHERE
+        strftime('%Y-%m-%d',DateTime)='${req.params.date}'
+        AND
+        DetailView.BerryGrade =1
+    GROUP BY
+        BerryType) t2
+ON
+    t1.BerryTypeName = t2.BerryType
+LEFT JOIN
+    (SELECT
+        BerryType,
+        SUM(NettWeight) AS DayWeightClassOther
+    FROM
+        DetailView
+    WHERE
+        strftime('%Y-%m-%d',DateTime)='${req.params.date}'
+        AND
+        DetailView.BerryGrade =2
+    GROUP BY
+        BerryType) t3
+ON
+    t1.BerryTypeName = t3.BerryType`,
         (error,rows)=>{
             if(error) {
                 console.log(error);
