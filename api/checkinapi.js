@@ -1,6 +1,6 @@
 const express = require('express');
 const sqlite = require('sqlite3');
-const Ajv = require('ajv');
+const Ajv = require('ajv').default;
 
 const apiRouter = express.Router();
 const db = new sqlite.Database('./berryharvest.sqlite', (err)=>{
@@ -30,7 +30,7 @@ let blockNameList = [];
 const formSchema = {
     "type":"object",
     "properties": {
-        "entryid": {"type":["number","string", "null"], "maxLength":16},
+        "entryid": {"type":["string","null"],"maxLength":16},
         "datetime": {"type":"string", "maxLength":50},
         "berrytype": {"type":"string", "maxLength":6},
         "blockid": {"type":"string", "maxLength":6},
@@ -41,13 +41,13 @@ const formSchema = {
         "grossweight": {"type":"string", "maxLength":6},
         "crateindividualweight": {"type":"string", "maxLength":6},
         "nettweight": {"type":"string", "maxLength":6},
-        "qcteam": {"type":["number","string", "null"], "default":null},
+        "qcteam": {"type":["string","null"],"default":null},
         "qctemp": {"type":["string","null"], "maxLength":6},
         "qcbrix": {"type":["string","null"], "maxLength":6},
         "qcgpberry": {"type":["string","null"], "maxLength":6},
         "qccolour": {"type":["string", "null"], "maxLength":20},
         "qcfeel": {"type":["string", "null"], "maxLength":20},
-        "qccomments": {"type":["number","string", "null"], "maxLength":50},
+        "qccomments": {"type":["string","null"],"maxLength":50},
     },
     "additionalProperties":false,
     "required":["datetime","berrytype","blockid","varietyid","berrygrade","numofcrates","grossweight","crateindividualweight","nettweight"]

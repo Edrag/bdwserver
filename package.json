@@ -4,7 +4,7 @@
   "description": "handle requests as main point to other apps",
   "main": "server.js",
   "dependencies": {
-    "ajv": "^6.12.5",
+    "ajv": "^7.0.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "errorhandler": "^1.5.1",
